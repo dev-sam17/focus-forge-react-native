@@ -1,8 +1,8 @@
 {
-  "name": "expo-template-blank-typescript",
-  "description": "The Blank project template includes the minimum dependencies to run and an empty root component.",
-  "license": "0BSD",
-  "version": "57.0.24",
+  "name": "Focus Forge",
+  "description": "Focus Forge is a mobile application that helps users stay focused and productive.",
+  "license": "MIT",
+  "version": "1.0.0",
   "main": "index.ts",
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
