@@ -1,0 +1,36 @@
+name: Release APK
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - run: npm install -g pnpm && pnpm install --frozen-lockfile
+      - name: Build APK on EAS
+        run: eas build --platform android --profile production --non-interactive --wait --output ./focus-forge.apk
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./focus-forge.apk
+          name: "Focus Forge ${{ github.ref_name }}"
+          body: |
+            ## Focus Forge ${{ github.ref_name }}
+
+            ### Install
+            Download `focus-forge.apk` and install on your Android device.
+
+            ### What's Changed
+            See commit history for changes since last release.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
