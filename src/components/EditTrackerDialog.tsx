@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,22 +6,47 @@ import {
   TouchableOpacity,
   Modal,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { Target, Sparkles, X } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import type { NewTracker } from '../lib/types';
+import type { Tracker } from '../lib/types';
+import useApiClient from '../hooks/useApiClient';
+import { useAuth } from '../contexts/AuthContext';
 
-interface AddTaskDialogProps {
+interface EditTrackerDialogProps {
   visible: boolean;
   onClose: () => void;
-  onAddTask: (task: NewTracker & { workDays: string }) => void;
+  tracker: Tracker | null;
+  onSuccess: () => void;
 }
 
-export function AddTaskDialog({ visible, onClose, onAddTask }: AddTaskDialogProps) {
+export function EditTrackerDialog({
+  visible,
+  onClose,
+  tracker,
+  onSuccess,
+}: EditTrackerDialogProps) {
+  const { user } = useAuth();
+  const api = useApiClient(user?.id);
+
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [targetHours, setTargetHours] = useState('20');
+  const [targetHours, setTargetHours] = useState('');
   const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5]);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (tracker && visible) {
+      setName(tracker.trackerName || '');
+      setDescription(tracker.description || '');
+      setTargetHours(tracker.targetHours ? tracker.targetHours.toString() : '');
+      const parsedDays = tracker.workDays
+        ? tracker.workDays.split(',').map(Number).filter((n) => !isNaN(n))
+        : [1, 2, 3, 4, 5];
+      setSelectedDays(parsedDays);
+    }
+  }, [tracker, visible]);
 
   const daysOfWeek = [
     { value: 0, label: 'S' },
@@ -43,21 +68,24 @@ export function AddTaskDialog({ visible, onClose, onAddTask }: AddTaskDialogProp
     }
   };
 
-  const handleCreate = () => {
-    if (!name.trim()) return;
+  const handleSave = async () => {
+    if (!name.trim() || !tracker) return;
 
-    onAddTask({
+    setSaving(true);
+    const updated = {
       trackerName: name.trim(),
       description: description.trim(),
       targetHours: parseFloat(targetHours) || 0,
       workDays: selectedDays.join(','),
-    });
+    };
 
-    setName('');
-    setDescription('');
-    setTargetHours('20');
-    setSelectedDays([1, 2, 3, 4, 5]);
-    onClose();
+    const res = await api(`/trackers/${tracker.id}/edit`, 'PUT', updated);
+    setSaving(false);
+
+    if (res.success) {
+      onSuccess();
+      onClose();
+    }
   };
 
   return (
@@ -104,7 +132,7 @@ export function AddTaskDialog({ visible, onClose, onAddTask }: AddTaskDialogProp
                 <Target size={16} color="white" />
               </View>
               <Text className="text-lg font-bold text-foreground">
-                Create New Tracker
+                Edit Tracker
               </Text>
               <Sparkles size={16} color="#3b82f6" className="ml-1.5" />
             </View>
@@ -239,8 +267,8 @@ export function AddTaskDialog({ visible, onClose, onAddTask }: AddTaskDialogProp
                 <Text className="text-foreground font-medium text-sm">Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={handleCreate}
-                disabled={!name.trim()}
+                onPress={handleSave}
+                disabled={saving || !name.trim()}
                 activeOpacity={0.85}
                 style={{
                   borderRadius: 12,
@@ -254,9 +282,14 @@ export function AddTaskDialog({ visible, onClose, onAddTask }: AddTaskDialogProp
                   style={{
                     paddingHorizontal: 20,
                     paddingVertical: 10,
+                    flexDirection: 'row',
+                    alignItems: 'center',
                   }}
                 >
-                  <Text className="text-white font-semibold text-sm">Create Tracker</Text>
+                  {saving && (
+                    <ActivityIndicator size="small" color="white" style={{ marginRight: 8 }} />
+                  )}
+                  <Text className="text-white font-semibold text-sm">Save Changes</Text>
                 </LinearGradient>
               </TouchableOpacity>
             </View>
@@ -267,5 +300,4 @@ export function AddTaskDialog({ visible, onClose, onAddTask }: AddTaskDialogProp
   );
 }
 
-export default AddTaskDialog;
-
+export default EditTrackerDialog;
