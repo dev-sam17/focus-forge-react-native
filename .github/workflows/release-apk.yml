@@ -59,8 +59,11 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
           packager: npm
       - run: pnpm install --frozen-lockfile
-      - name: Build APK on EAS
-        run: eas build --platform android --profile production --non-interactive --wait --output ./focus-forge.apk
+      - name: Build APK on EAS and Download
+        run: |
+          BUILD_JSON=$(eas build --platform android --profile production --non-interactive --wait --json)
+          BUILD_URL=$(echo $BUILD_JSON | jq -r '.[0].artifacts.buildUrl')
+          wget -O ./focus-forge.apk "$BUILD_URL"
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
