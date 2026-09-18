@@ -1,7 +1,8 @@
 name: OTA Update
 on:
   push:
-    branches: [master]
+    tags:
+      - 'v*.*.*'
 
 jobs:
   update:
