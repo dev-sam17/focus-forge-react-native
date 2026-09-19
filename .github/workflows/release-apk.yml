@@ -46,13 +46,16 @@ jobs:
     needs: check-version
     if: needs.check-version.outputs.is_major_or_minor == 'true'
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v7
+      - name: Install pnpm
+        run: npm install -g pnpm
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-      - name: Install pnpm
-        run: npm install -g pnpm
+          cache: 'pnpm'
       - uses: expo/expo-github-action@v9
         with:
           eas-version: latest
@@ -64,6 +67,8 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+      - name: Setup Gradle Cache
+        uses: gradle/actions/setup-gradle@v4
       - name: Configure Gradle JVM memory
         run: |
           mkdir -p ~/.gradle
