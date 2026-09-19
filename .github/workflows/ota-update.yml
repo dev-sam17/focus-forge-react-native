@@ -20,4 +20,7 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
           packager: npm
       - run: pnpm install --frozen-lockfile
-      - run: eas update --branch production --message "${{ github.event.head_commit.message }}" --non-interactive
+      - name: Run EAS Update
+        env:
+          EAS_BUILD_NO_EXPO_GO_WARNING: true
+        run: eas update --branch production --message "${{ github.event.head_commit.message }}" --non-interactive
