@@ -8,8 +8,9 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
-import { LogOut, User, Wifi, WifiOff, X } from 'lucide-react-native';
+import { LogOut, User, Wifi, WifiOff, X, RefreshCcw } from 'lucide-react-native';
 import { API_URL } from '../lib/env';
+import * as Updates from 'expo-updates';
 
 interface ProfileDialogProps {
   visible: boolean;
@@ -20,6 +21,8 @@ export function ProfileDialog({ visible, onClose }: ProfileDialogProps) {
   const { user, signOut } = useAuth();
   const [isOnline, setIsOnline] = useState<boolean | null>(null);
   const [signingOut, setSigningOut] = useState(false);
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const [updateMessage, setUpdateMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!visible) return;
@@ -41,6 +44,32 @@ export function ProfileDialog({ visible, onClose }: ProfileDialogProps) {
     await signOut();
     setSigningOut(false);
     onClose();
+  };
+
+  const handleCheckForUpdate = async () => {
+    try {
+      setCheckingUpdate(true);
+      setUpdateMessage('Checking for updates...');
+      const update = await Updates.checkForUpdateAsync();
+      
+      if (update.isAvailable) {
+        setUpdateMessage('Downloading update...');
+        await Updates.fetchUpdateAsync();
+        setUpdateMessage('Restarting app...');
+        await Updates.reloadAsync();
+      } else {
+        setUpdateMessage('App is up to date.');
+        setTimeout(() => setUpdateMessage(null), 3000);
+      }
+    } catch (error) {
+      setUpdateMessage('Error checking for updates.');
+      console.error(error);
+      setTimeout(() => setUpdateMessage(null), 3000);
+    } finally {
+      if (!updateMessage?.includes('Restarting')) {
+        setCheckingUpdate(false);
+      }
+    }
   };
 
   const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
@@ -159,6 +188,32 @@ export function ProfileDialog({ visible, onClose }: ProfileDialogProps) {
           </View>
 
           {/* Actions */}
+          <TouchableOpacity
+            onPress={handleCheckForUpdate}
+            disabled={checkingUpdate}
+            activeOpacity={0.8}
+            style={{
+              backgroundColor: 'rgba(59, 130, 246, 0.12)',
+              borderColor: 'rgba(59, 130, 246, 0.3)',
+              borderWidth: 1,
+              borderRadius: 14,
+              paddingVertical: 12,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: 12,
+            }}
+          >
+            {checkingUpdate ? (
+              <ActivityIndicator size="small" color="#3b82f6" style={{ marginRight: 8 }} />
+            ) : (
+              <RefreshCcw size={18} color="#3b82f6" style={{ marginRight: 8 }} />
+            )}
+            <Text className="text-primary font-semibold text-sm">
+              {updateMessage || 'Check for Updates'}
+            </Text>
+          </TouchableOpacity>
+
           <TouchableOpacity
             onPress={handleSignOut}
             disabled={signingOut}
