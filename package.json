@@ -2,7 +2,7 @@
   "name": "Focus Forge",
   "description": "Focus Forge is a mobile application that helps users stay focused and productive.",
   "license": "MIT",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "main": "index.ts",
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -40,10 +40,11 @@
   },
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
-    "export-apk": "cd android && ANDROID_HOME=$HOME/Android/Sdk JAVA_HOME=$HOME/android-studio/jbr ./gradlew assembleRelease",
-    "deploy": "cd android && ANDROID_HOME=$HOME/Android/Sdk JAVA_HOME=$HOME/android-studio/jbr ./gradlew assembleRelease && adb install -r app/build/outputs/apk/release/app-release.apk && echo '✅ APK installed on device!'"
+    "export-apk": "cd android && ANDROID_HOME=$HOME/Android/Sdk JAVA_HOME=$HOME/.gradle/jdks/eclipse_adoptium-17-amd64-linux.2 ./gradlew assembleRelease",
+    "deploy": "cd android && ANDROID_HOME=$HOME/Android/Sdk JAVA_HOME=$HOME/.gradle/jdks/eclipse_adoptium-17-amd64-linux.2 ./gradlew assembleRelease && adb install -r app/build/outputs/apk/release/app-release.apk && echo '✅ APK installed on device!'",
+    "sync": "npx expo prebuild --platform android --clean"
   }
 }
