@@ -331,8 +331,7 @@ export function TimeTracker({
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                   style={{
-                    width: '100%',
-                    height: '100%',
+                    flex: 1,
                     flexDirection: 'row',
                     alignItems: 'center',
                     justifyContent: 'center',
