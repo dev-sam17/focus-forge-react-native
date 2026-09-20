@@ -2,7 +2,7 @@
   "expo": {
     "name": "Focus Forge",
     "slug": "focus-forge-react-native",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "scheme": "focus-forge",
     "orientation": "portrait",
     "icon": "./assets/AppIcon.icon/Assets/icon.png",
