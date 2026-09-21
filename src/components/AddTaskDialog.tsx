@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Modal,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { Target, Sparkles, X } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -14,7 +15,12 @@ import type { NewTracker } from '../lib/types';
 interface AddTaskDialogProps {
   visible: boolean;
   onClose: () => void;
-  onAddTask: (task: NewTracker & { workDays: string }) => void;
+  onAddTask: (task: {
+    trackerName: string;
+    description: string;
+    targetHours: number;
+    workDays: string;
+  }) => Promise<boolean | string> | void;
 }
 
 export function AddTaskDialog({ visible, onClose, onAddTask }: AddTaskDialogProps) {
@@ -22,6 +28,7 @@ export function AddTaskDialog({ visible, onClose, onAddTask }: AddTaskDialogProp
   const [description, setDescription] = useState('');
   const [targetHours, setTargetHours] = useState('20');
   const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5]);
+  const [saving, setSaving] = useState(false);
 
   const daysOfWeek = [
     { value: 0, label: 'S' },
@@ -43,21 +50,32 @@ export function AddTaskDialog({ visible, onClose, onAddTask }: AddTaskDialogProp
     }
   };
 
-  const handleCreate = () => {
-    if (!name.trim()) return;
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-    onAddTask({
+  const handleCreate = async () => {
+    if (!name.trim() || saving) return;
+
+    setErrorMsg(null);
+    setSaving(true);
+    const result = await onAddTask({
       trackerName: name.trim(),
       description: description.trim(),
       targetHours: parseFloat(targetHours) || 0,
       workDays: selectedDays.join(','),
     });
+    setSaving(false);
 
-    setName('');
-    setDescription('');
-    setTargetHours('20');
-    setSelectedDays([1, 2, 3, 4, 5]);
-    onClose();
+    if (result === true) {
+      setName('');
+      setDescription('');
+      setTargetHours('20');
+      setSelectedDays([1, 2, 3, 4, 5]);
+      onClose();
+    } else if (typeof result === 'string') {
+      setErrorMsg(result);
+    } else if (result === false) {
+      setErrorMsg('Failed to create tracker. Please try again.');
+    }
   };
 
   return (
@@ -117,6 +135,12 @@ export function AddTaskDialog({ visible, onClose, onAddTask }: AddTaskDialogProp
           </LinearGradient>
 
           <ScrollView className="p-5 max-h-[500px]" showsVerticalScrollIndicator={false}>
+            {errorMsg && (
+              <View className="mb-4 bg-red-500/10 border border-red-500/20 p-3 rounded-xl">
+                <Text className="text-red-400 text-sm">{errorMsg}</Text>
+              </View>
+            )}
+
             {/* Task Name Input */}
             <View className="mb-4">
               <Text className="text-xs font-semibold text-foreground/80 mb-2">
@@ -240,11 +264,12 @@ export function AddTaskDialog({ visible, onClose, onAddTask }: AddTaskDialogProp
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleCreate}
-                disabled={!name.trim()}
+                disabled={!name.trim() || saving}
                 activeOpacity={0.85}
                 style={{
                   borderRadius: 12,
                   overflow: 'hidden',
+                  opacity: !name.trim() || saving ? 0.5 : 1,
                 }}
               >
                 <LinearGradient
@@ -254,8 +279,13 @@ export function AddTaskDialog({ visible, onClose, onAddTask }: AddTaskDialogProp
                   style={{
                     paddingHorizontal: 20,
                     paddingVertical: 10,
+                    flexDirection: 'row',
+                    alignItems: 'center',
                   }}
                 >
+                  {saving && (
+                    <ActivityIndicator size="small" color="white" style={{ marginRight: 8 }} />
+                  )}
                   <Text className="text-white font-semibold text-sm">Create Tracker</Text>
                 </LinearGradient>
               </TouchableOpacity>

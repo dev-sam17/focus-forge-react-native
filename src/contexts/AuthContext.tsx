@@ -124,6 +124,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null);
         setLoading(false);
       }
+
+      // Handle user upsert asynchronously without blocking auth state
+      if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session?.user) {
+        import('../lib/env').then(({ API_URL }) => {
+          const serverUrl = API_URL.replace(/\/+$/, '');
+          fetch(`${serverUrl}/api/webhook`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId: session.user.id,
+              email: session.user.email,
+              username: session.user.user_metadata?.username || session.user.email?.split("@")[0],
+              firstName: session.user.user_metadata?.full_name?.split(" ")[0] || "",
+              lastName: session.user.user_metadata?.full_name?.split(" ").slice(1).join(" ") || "",
+              avatarUrl: session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture || "",
+              provider: session.user.app_metadata?.provider || "email",
+              emailVerified: session.user.email_confirmed_at ? true : false,
+              isActive: true,
+            }),
+          }).catch((err) => console.error("Failed to sync user from mobile:", err));
+        });
+      }
     });
 
     return () => {

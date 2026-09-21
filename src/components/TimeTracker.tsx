@@ -296,42 +296,32 @@ export function TimeTracker({
 
           {/* Action Buttons Row */}
           <View className="flex-row gap-2 items-center">
-            {isRunning ? (
-              <TouchableOpacity
-                onPress={handleStop}
-                activeOpacity={0.8}
-                style={{
-                  flex: 1,
-                  height: 38,
-                  backgroundColor: 'rgba(239, 68, 68, 0.15)',
-                  borderColor: 'rgba(239, 68, 68, 0.4)',
-                  borderWidth: 1,
-                  borderRadius: 10,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Square size={15} color="#ef4444" />
-                <Text className="text-destructive font-semibold text-xs ml-1.5">Stop</Text>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity
-                onPress={handleStart}
-                activeOpacity={0.85}
-                style={{
-                  flex: 1,
-                  height: 38,
-                  borderRadius: 10,
-                  overflow: 'hidden',
-                }}
-              >
+            <TouchableOpacity
+              onPress={isRunning ? handleStop : handleStart}
+              activeOpacity={0.85}
+              style={{
+                flex: 1,
+                height: 38,
+                borderRadius: 10,
+                overflow: 'hidden',
+                backgroundColor: isRunning ? 'rgba(239, 68, 68, 0.15)' : 'transparent',
+                borderColor: isRunning ? 'rgba(239, 68, 68, 0.4)' : 'transparent',
+                borderWidth: isRunning ? 1 : 0,
+              }}
+            >
+              {isRunning ? (
+                <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                  <Square size={15} color="#ef4444" />
+                  <Text className="text-destructive font-semibold text-xs ml-1.5">Stop</Text>
+                </View>
+              ) : (
                 <LinearGradient
                   colors={['#3b82f6', '#10b981']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                   style={{
-                    flex: 1,
+                    width: '100%',
+                    height: '100%',
                     flexDirection: 'row',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -340,8 +330,8 @@ export function TimeTracker({
                   <Play size={15} color="#ffffff" />
                   <Text className="text-white font-semibold text-xs ml-1.5">Start</Text>
                 </LinearGradient>
-              </TouchableOpacity>
-            )}
+              )}
+            </TouchableOpacity>
 
             {/* Edit Button */}
             <TouchableOpacity

@@ -76,7 +76,9 @@ export function TimeTrackingDashboard() {
     });
     if (res.success) {
       await fetchTasks();
+      return true;
     }
+    return res.error || 'Failed to create tracker';
   };
 
   const handleArchiveTask = async (taskId: string) => {
