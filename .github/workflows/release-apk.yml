@@ -5,46 +5,7 @@ on:
       - 'v*.*.*'
 
 jobs:
-  check-version:
-    runs-on: ubuntu-24.04
-    outputs:
-      is_major_or_minor: ${{ steps.check.outputs.is_major_or_minor }}
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - name: Check version bump
-        id: check
-        run: |
-          CURRENT_TAG="${{ github.ref_name }}"
-          # Get the previous tag by sorting version strings
-          PREV_TAG=$(git tag -l | sort -V | grep -B 1 "^$CURRENT_TAG$" | head -n 1)
-          
-          if [ -z "$PREV_TAG" ] || [ "$PREV_TAG" = "$CURRENT_TAG" ]; then
-            echo "No previous tag found, assuming major/minor bump."
-            echo "is_major_or_minor=true" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          
-          # Remove 'v' prefix if present
-          CURR_VER=${CURRENT_TAG#v}
-          PREV_VER=${PREV_TAG#v}
-          
-          CURR_MAJOR=$(echo $CURR_VER | cut -d. -f1)
-          CURR_MINOR=$(echo $CURR_VER | cut -d. -f2)
-          
-          PREV_MAJOR=$(echo $PREV_VER | cut -d. -f1)
-          PREV_MINOR=$(echo $PREV_VER | cut -d. -f2)
-          
-          if [ "$CURR_MAJOR" != "$PREV_MAJOR" ] || [ "$CURR_MINOR" != "$PREV_MINOR" ]; then
-            echo "is_major_or_minor=true" >> $GITHUB_OUTPUT
-          else
-            echo "is_major_or_minor=false" >> $GITHUB_OUTPUT
-          fi
-
   build-and-release:
-    needs: check-version
-    if: needs.check-version.outputs.is_major_or_minor == 'true'
     runs-on: ubuntu-24.04
     permissions:
       contents: write
