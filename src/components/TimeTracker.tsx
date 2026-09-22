@@ -19,6 +19,7 @@ import {
   ChevronUp,
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useKeepAwake } from 'expo-keep-awake';
 import type { Tracker, ActiveSession, WorkStats } from '../lib/types';
 import { formatTime } from '../lib/utils';
 import useApiClient from '../hooks/useApiClient';
@@ -31,6 +32,11 @@ interface TimeTrackerProps {
   onStop: (taskId: string, elapsedTime: number) => void;
   onArchive: (taskId: string) => void;
   onEdit: (taskId: string) => void;
+}
+
+function KeepAwake() {
+  useKeepAwake();
+  return null;
 }
 
 export function TimeTracker({
@@ -421,6 +427,8 @@ export function TimeTracker({
           </View>
         </View>
       </Modal>
+
+      {isRunning && <KeepAwake />}
     </>
   );
 }
