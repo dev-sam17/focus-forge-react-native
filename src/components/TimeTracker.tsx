@@ -15,6 +15,8 @@ import {
   TrendingUp,
   TrendingDown,
   Edit2,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { Tracker, ActiveSession, WorkStats } from '../lib/types';
@@ -42,10 +44,18 @@ export function TimeTracker({
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [archiveModalVisible, setArchiveModalVisible] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(!!session);
   const [workStats, setWorkStats] = useState<WorkStats>({
     workAdvance: 0,
     workDebt: 0,
   });
+
+  // Expand when running
+  useEffect(() => {
+    if (isRunning) {
+      setIsExpanded(true);
+    }
+  }, [isRunning]);
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { user } = useAuth();
@@ -134,15 +144,17 @@ export function TimeTracker({
         }}
       >
         {/* Card Header */}
-        <View
+        <TouchableOpacity
+          onPress={() => setIsExpanded(!isExpanded)}
+          activeOpacity={0.7}
           style={{
             backgroundColor: 'rgba(55, 65, 81, 0.25)',
-            borderBottomWidth: 1,
+            borderBottomWidth: isExpanded ? 1 : 0,
             borderColor: 'rgba(75, 85, 99, 0.3)',
             padding: 14,
             flexDirection: 'row',
             justifyContent: 'space-between',
-            alignItems: 'flex-start',
+            alignItems: 'center',
           }}
         >
           <View className="flex-1 mr-2">
@@ -156,40 +168,49 @@ export function TimeTracker({
             ) : null}
           </View>
 
-          {/* Status Badge */}
-          {isRunning ? (
-            <View
-              style={{
-                backgroundColor: 'rgba(16, 185, 129, 0.15)',
-                borderColor: '#10b981',
-                borderWidth: 1,
-                borderRadius: 12,
-                paddingHorizontal: 8,
-                paddingVertical: 3,
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}
-            >
-              <Disc size={12} color="#10b981" />
-              <Text className="text-[11px] font-semibold text-success ml-1">Active</Text>
-            </View>
-          ) : (
-            <View
-              style={{
-                borderColor: 'rgba(156, 163, 175, 0.3)',
-                borderWidth: 1,
-                borderRadius: 12,
-                paddingHorizontal: 8,
-                paddingVertical: 3,
-              }}
-            >
-              <Text className="text-[11px] font-medium text-muted-foreground">Inactive</Text>
-            </View>
-          )}
-        </View>
+          {/* Status Badge & Chevron */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            {isRunning ? (
+              <View
+                style={{
+                  backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                  borderColor: '#10b981',
+                  borderWidth: 1,
+                  borderRadius: 12,
+                  paddingHorizontal: 8,
+                  paddingVertical: 3,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}
+              >
+                <Disc size={12} color="#10b981" />
+                <Text className="text-[11px] font-semibold text-success ml-1">Active</Text>
+              </View>
+            ) : (
+              <View
+                style={{
+                  borderColor: 'rgba(156, 163, 175, 0.3)',
+                  borderWidth: 1,
+                  borderRadius: 12,
+                  paddingHorizontal: 8,
+                  paddingVertical: 3,
+                }}
+              >
+                <Text className="text-[11px] font-medium text-muted-foreground">Inactive</Text>
+              </View>
+            )}
+            
+            {isExpanded ? (
+              <ChevronUp size={20} color="#9ca3af" />
+            ) : (
+              <ChevronDown size={20} color="#9ca3af" />
+            )}
+          </View>
+        </TouchableOpacity>
 
         {/* Card Body */}
-        <View className="p-4">
+        {isExpanded && (
+          <View className="p-4">
           {/* Timer Display */}
           <View className="items-center mb-3">
             <View className="flex-row items-center justify-center">
@@ -350,6 +371,7 @@ export function TimeTracker({
             </TouchableOpacity>
           </View>
         </View>
+        )}
       </View>
 
       {/* Archive Confirmation Dialog */}
