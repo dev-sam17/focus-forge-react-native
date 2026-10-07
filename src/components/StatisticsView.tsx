@@ -5,7 +5,9 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   ScrollView,
+  Dimensions,
 } from 'react-native';
+import { BarChart } from 'react-native-chart-kit';
 import {
   Clock,
   Target,
@@ -21,6 +23,13 @@ import { useAuth } from '../contexts/AuthContext';
 
 interface StatisticsViewProps {
   tasks: Tracker[];
+}
+
+interface DailyTotal {
+  date: string;
+  totalMinutes: number;
+  totalHours: number;
+  sessionCount: number;
 }
 
 interface TodayStats {
@@ -39,12 +48,15 @@ export function StatisticsView({ tasks }: StatisticsViewProps) {
   const api = useApiClient(user?.id);
 
   const [todayStats, setTodayStats] = useState<TodayStats | null>(null);
+  const [dailyTotals, setDailyTotals] = useState<DailyTotal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingChart, setLoadingChart] = useState(true);
   const [selectedTask, setSelectedTask] = useState<string>('all');
 
   const fetchStats = async () => {
     if (!user?.id) return;
     setLoading(true);
+    setLoadingChart(true);
     try {
       const endpoint = `/users/${user.id}/today${
         selectedTask !== 'all' ? `?trackerId=${selectedTask}` : ''
@@ -66,16 +78,53 @@ export function StatisticsView({ tasks }: StatisticsViewProps) {
           status: 'not_started',
         });
       }
+
+      // Fetch daily totals for the chart
+      const chartEndpoint = `/users/${user.id}/daily-totals/week${
+        selectedTask !== 'all' ? `?trackerId=${selectedTask}` : ''
+      }`;
+      const chartRes = await api<DailyTotal[]>(chartEndpoint);
+      if (chartRes.success && chartRes.data) {
+        setDailyTotals(chartRes.data);
+      }
     } catch {
       // Fallback
     } finally {
       setLoading(false);
+      setLoadingChart(false);
     }
   };
 
   useEffect(() => {
     fetchStats();
   }, [user?.id, selectedTask]);
+
+  const screenWidth = Dimensions.get("window").width;
+  const chartConfig = {
+    backgroundGradientFrom: "rgba(31, 41, 55, 0.7)",
+    backgroundGradientTo: "rgba(31, 41, 55, 0.7)",
+    backgroundGradientFromOpacity: 0,
+    backgroundGradientToOpacity: 0,
+    color: (opacity = 1) => `rgba(59, 130, 246, ${opacity})`,
+    labelColor: (opacity = 1) => `rgba(156, 163, 175, ${opacity})`,
+    strokeWidth: 2,
+    barPercentage: 0.6,
+    useShadowColorFromDataset: false,
+    decimalPlaces: 1,
+  };
+
+  const chartData = {
+    labels: dailyTotals.length > 0 
+      ? dailyTotals.map(d => new Date(d.date).toLocaleDateString(undefined, { weekday: 'short' }))
+      : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    datasets: [
+      {
+        data: dailyTotals.length > 0 
+          ? dailyTotals.map(d => d.totalHours)
+          : [0, 0, 0, 0, 0, 0, 0],
+      }
+    ]
+  };
 
   const todayDateFormatted = new Date().toLocaleDateString(undefined, {
     weekday: 'long',
@@ -296,6 +345,43 @@ export function StatisticsView({ tasks }: StatisticsViewProps) {
             </View>
           </View>
         ) : null}
+      </View>
+
+      {/* Daily Hours Chart Card */}
+      <View
+        style={{
+          backgroundColor: 'rgba(31, 41, 55, 0.7)',
+          borderColor: 'rgba(75, 85, 99, 0.35)',
+          borderWidth: 1,
+          borderRadius: 20,
+          padding: 20,
+          marginBottom: 16,
+        }}
+      >
+        <Text className="text-base font-bold text-foreground mb-4">Daily Hours (This Week)</Text>
+        {loadingChart ? (
+          <View className="py-10 items-center justify-center">
+            <ActivityIndicator size="small" color="#3b82f6" />
+          </View>
+        ) : (
+          <View style={{ marginLeft: -20 }}>
+            <BarChart
+              data={chartData}
+              width={screenWidth - 30} // accounting for padding
+              height={220}
+              yAxisLabel=""
+              yAxisSuffix="h"
+              chartConfig={chartConfig}
+              verticalLabelRotation={0}
+              fromZero={true}
+              showValuesOnTopOfBars={true}
+              withHorizontalLabels={true}
+              style={{
+                borderRadius: 16,
+              }}
+            />
+          </View>
+        )}
       </View>
 
       {/* Summary Tracker Targets Card */}
