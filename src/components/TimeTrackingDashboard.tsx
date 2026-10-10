@@ -6,6 +6,7 @@ import {
   ScrollView,
   RefreshControl,
   ActivityIndicator,
+  useWindowDimensions,
 } from 'react-native';
 import { TimeTracker } from './TimeTracker';
 import { ArchivedTracker } from './ArchivedTracker';
@@ -21,6 +22,8 @@ import { useAuth } from '../contexts/AuthContext';
 export function TimeTrackingDashboard() {
   const { user } = useAuth();
   const api = useApiClient(user?.id);
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
 
   const [activeTab, setActiveTab] = useState<'trackers' | 'stats' | 'archives'>('trackers');
   const [tasks, setTasks] = useState<Tracker[]>([]);
@@ -417,17 +420,20 @@ export function TimeTrackingDashboard() {
                   </TouchableOpacity>
                 </View>
               ) : (
-                activeTasks.map((task) => (
-                  <TimeTracker
-                    key={task.id}
-                    task={task}
-                    session={activeSessions[task.id]}
-                    onStart={handleSessionStart}
-                    onStop={handleSessionEnd}
-                    onArchive={handleArchiveTask}
-                    onEdit={handleEditTracker}
-                  />
-                ))
+                <View style={{ flexDirection: isLandscape ? 'row' : 'column', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+                  {activeTasks.map((task) => (
+                    <View key={task.id} style={{ width: isLandscape ? '48%' : '100%' }}>
+                      <TimeTracker
+                        task={task}
+                        session={activeSessions[task.id]}
+                        onStart={handleSessionStart}
+                        onStop={handleSessionEnd}
+                        onArchive={handleArchiveTask}
+                        onEdit={handleEditTracker}
+                      />
+                    </View>
+                  ))}
+                </View>
               )}
             </View>
           )}
@@ -473,14 +479,17 @@ export function TimeTrackingDashboard() {
                   </Text>
                 </View>
               ) : (
-                archivedTasks.map((task) => (
-                  <ArchivedTracker
-                    key={task.id}
-                    task={task}
-                    onDelete={handleDeleteTask}
-                    onUnarchive={handleUnarchiveTask}
-                  />
-                ))
+                <View style={{ flexDirection: isLandscape ? 'row' : 'column', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+                  {archivedTasks.map((task) => (
+                    <View key={task.id} style={{ width: isLandscape ? '48%' : '100%' }}>
+                      <ArchivedTracker
+                        task={task}
+                        onDelete={handleDeleteTask}
+                        onUnarchive={handleUnarchiveTask}
+                      />
+                    </View>
+                  ))}
+                </View>
               )}
             </View>
           )}

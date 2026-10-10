@@ -58,14 +58,14 @@ export function DashboardScreen() {
             borderColor: 'rgba(255, 255, 255, 0.1)',
             borderWidth: 1,
             borderRadius: 18,
-            paddingHorizontal: 16,
+            paddingHorizontal: isLandscape ? 12 : 16,
             paddingVertical: 12,
             shadowColor: '#000',
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.2,
             shadowRadius: 10,
             elevation: 4,
-            ...(isLandscape && { width: 200, marginBottom: 8 }),
+            ...(isLandscape && { width: 72, marginBottom: 8 }),
           }}
           className={`${isLandscape ? 'flex-col items-center justify-between mb-4' : 'flex-row items-center justify-between mb-4'}`}
         >
@@ -82,14 +82,15 @@ export function DashboardScreen() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 marginRight: isLandscape ? 0 : 10,
-                marginBottom: isLandscape ? 12 : 0,
               }}
             >
               <Clock size={18} color="#ffffff" />
             </LinearGradient>
-            <Text className={`text-xl font-bold text-foreground tracking-tight ${isLandscape ? 'text-center mb-8' : ''}`}>
-              {isLandscape ? 'Focus\nForge' : 'Focus Forge'}
-            </Text>
+            {!isLandscape && (
+              <Text className="text-xl font-bold text-foreground tracking-tight">
+                Focus Forge
+              </Text>
+            )}
           </View>
 
           {/* User Profile Trigger */}
