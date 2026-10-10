@@ -2,9 +2,9 @@
   "expo": {
     "name": "Focus Forge",
     "slug": "focus-forge-react-native",
-    "version": "1.1.5",
+    "version": "1.1.6",
     "scheme": "focus-forge",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/AppIcon.icon/Assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
@@ -12,7 +12,7 @@
     },
     "android": {
       "package": "com.focusforge.app",
-      "versionCode": 3,
+      "versionCode": 4,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android/adaptive-foreground.png"

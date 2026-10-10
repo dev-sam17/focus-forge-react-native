@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   ScrollView,
   StatusBar,
+  useWindowDimensions,
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { Clock, Sparkles } from 'lucide-react-native';
@@ -37,6 +38,8 @@ function ChromeIcon({ size = 20, color = 'white' }: { size?: number; color?: str
 export function SignInScreen() {
   const { signInWithGoogle } = useAuth();
   const [loading, setLoading] = useState(false);
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
 
   const handleSignIn = async () => {
     setLoading(true);
@@ -97,191 +100,248 @@ export function SignInScreen() {
         className="px-6 py-8"
         showsVerticalScrollIndicator={false}
       >
-        <View className="items-center w-full max-w-md mx-auto">
-          {/* Header */}
-          <View className="items-center mb-8">
-            <View className="flex-row items-center justify-center mb-6">
-              <LinearGradient
-                colors={['#3b82f6', '#10b981']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={{
-                  width: 64,
-                  height: 64,
-                  borderRadius: 16,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginRight: 14,
-                  shadowColor: '#6366f1',
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.4,
-                  shadowRadius: 16,
-                  elevation: 8,
-                }}
-              >
-                <Clock size={32} color="#ffffff" />
-              </LinearGradient>
-              <View>
-                <Text className="text-3xl font-bold text-foreground">
-                  Focus Forge
+        <View className={`w-full mx-auto ${isLandscape ? 'max-w-4xl flex-row items-center justify-between gap-12' : 'max-w-md items-center'}`}>
+          {/* Left Column in Landscape (Header & Features) */}
+          <View className={`${isLandscape ? 'flex-1' : 'w-full'}`}>
+            {/* Header */}
+            <View className={`items-center mb-8 ${isLandscape ? 'items-start' : ''}`}>
+              <View className={`flex-row items-center mb-6 ${isLandscape ? 'justify-start' : 'justify-center'}`}>
+                <LinearGradient
+                  colors={['#3b82f6', '#10b981']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={{
+                    width: 64,
+                    height: 64,
+                    borderRadius: 16,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginRight: 14,
+                    shadowColor: '#6366f1',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.4,
+                    shadowRadius: 16,
+                    elevation: 8,
+                  }}
+                >
+                  <Clock size={32} color="#ffffff" />
+                </LinearGradient>
+                <View>
+                  <Text className="text-3xl font-bold text-foreground">
+                    Focus Forge
+                  </Text>
+                  <View className="flex-row items-center mt-1">
+                    <Sparkles size={16} color="#3b82f6" />
+                    <Text className="text-sm text-muted-foreground ml-1">
+                      Forge better focus
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              <View className={`${isLandscape ? 'px-0 items-start' : 'px-4 items-center'}`}>
+                <Text className={`text-2xl font-semibold text-foreground mb-2 ${isLandscape ? 'text-left' : 'text-center'}`}>
+                  Welcome back!
                 </Text>
-                <View className="flex-row items-center mt-1">
-                  <Sparkles size={16} color="#3b82f6" />
-                  <Text className="text-sm text-muted-foreground ml-1">
-                    Forge better focus
+                <Text className={`text-sm text-muted-foreground leading-5 ${isLandscape ? 'text-left' : 'text-center'}`}>
+                  Sign in to continue forging your focus and boost your productivity.
+                </Text>
+              </View>
+            </View>
+
+            {/* Features Row - only show here if landscape */}
+            {isLandscape && (
+              <View className="flex-row justify-between w-full pr-8">
+                <View className="flex-1 items-start">
+                  <View
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 10,
+                      backgroundColor: 'rgba(59, 130, 246, 0.12)',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: 8,
+                    }}
+                  >
+                    <Clock size={20} color="#3b82f6" />
+                  </View>
+                  <Text className="font-medium text-xs text-foreground">
+                    Time Tracking
+                  </Text>
+                  <Text className="text-[11px] text-muted-foreground mt-0.5">
+                    Track time across projects
+                  </Text>
+                </View>
+
+                <View className="flex-1 items-start">
+                  <View
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 10,
+                      backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: 8,
+                    }}
+                  >
+                    <Sparkles size={20} color="#10b981" />
+                  </View>
+                  <Text className="font-medium text-xs text-foreground">
+                    Analytics
+                  </Text>
+                  <Text className="text-[11px] text-muted-foreground mt-0.5">
+                    Detailed insights
                   </Text>
                 </View>
               </View>
-            </View>
-
-            <View className="items-center px-4">
-              <Text className="text-2xl font-semibold text-foreground text-center mb-2">
-                Welcome back!
-              </Text>
-              <Text className="text-sm text-muted-foreground text-center leading-5">
-                Sign in to continue forging your focus and boost your productivity.
-              </Text>
-            </View>
+            )}
           </View>
 
-          {/* Sign In Glass Card */}
-          <View
-            style={{
-              backgroundColor: 'rgba(31, 41, 55, 0.55)',
-              borderColor: 'rgba(255, 255, 255, 0.1)',
-              borderWidth: 1,
-              borderRadius: 20,
-              padding: 24,
-              shadowColor: '#000000',
-              shadowOffset: { width: 0, height: 8 },
-              shadowOpacity: 0.3,
-              shadowRadius: 20,
-              elevation: 6,
-            }}
-            className="w-full mb-8"
-          >
-            <Text className="text-lg font-semibold text-center text-foreground mb-6">
-              Choose your sign-in method
-            </Text>
-
-            {/* Google Sign In Button */}
-            <TouchableOpacity
-              onPress={handleSignIn}
-              disabled={loading}
-              activeOpacity={0.85}
+          {/* Right Column in Landscape (Sign In Card & Features if Portrait) */}
+          <View className={`${isLandscape ? 'w-[400px]' : 'w-full'}`}>
+            {/* Sign In Glass Card */}
+            <View
               style={{
-                borderRadius: 12,
-                overflow: 'hidden',
-                shadowColor: '#1d4ed8',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.35,
-                shadowRadius: 12,
-                elevation: 4,
+                backgroundColor: 'rgba(31, 41, 55, 0.55)',
+                borderColor: 'rgba(255, 255, 255, 0.1)',
+                borderWidth: 1,
+                borderRadius: 20,
+                padding: 24,
+                shadowColor: '#000000',
+                shadowOffset: { width: 0, height: 8 },
+                shadowOpacity: 0.3,
+                shadowRadius: 20,
+                elevation: 6,
               }}
+              className="w-full mb-8"
             >
-              <LinearGradient
-                colors={['#2563eb', '#1d4ed8']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
+              <Text className="text-lg font-semibold text-center text-foreground mb-6">
+                Choose your sign-in method
+              </Text>
+
+              {/* Google Sign In Button */}
+              <TouchableOpacity
+                onPress={handleSignIn}
+                disabled={loading}
+                activeOpacity={0.85}
                 style={{
-                  height: 48,
-                  width: '100%',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  paddingHorizontal: 16,
+                  borderRadius: 12,
+                  overflow: 'hidden',
+                  shadowColor: '#1d4ed8',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.35,
+                  shadowRadius: 12,
+                  elevation: 4,
                 }}
               >
-                {loading ? (
-                  <ActivityIndicator color="white" style={{ marginRight: 10 }} />
-                ) : (
-                  <View style={{ marginRight: 10 }}>
-                    <ChromeIcon size={20} color="white" />
-                  </View>
-                )}
-                <Text className="text-white font-medium text-base">
-                  Continue with Google
+                <LinearGradient
+                  colors={['#2563eb', '#1d4ed8']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={{
+                    height: 48,
+                    width: '100%',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    paddingHorizontal: 16,
+                  }}
+                >
+                  {loading ? (
+                    <ActivityIndicator color="white" style={{ marginRight: 10 }} />
+                  ) : (
+                    <View style={{ marginRight: 10 }}>
+                      <ChromeIcon size={20} color="white" />
+                    </View>
+                  )}
+                  <Text className="text-white font-medium text-base">
+                    Continue with Google
+                  </Text>
+                </LinearGradient>
+              </TouchableOpacity>
+
+              {/* Terms & Privacy */}
+              <View className="pt-4 mt-6 border-t border-border/20">
+                <Text className="text-xs text-center text-muted-foreground leading-4">
+                  By signing in, you agree to our Terms of Service and Privacy Policy.
+                  {'\n'}
+                  Your data is secure and encrypted.
                 </Text>
-              </LinearGradient>
-            </TouchableOpacity>
-
-            {/* Terms & Privacy */}
-            <View className="pt-4 mt-6 border-t border-border/20">
-              <Text className="text-xs text-center text-muted-foreground leading-4">
-                By signing in, you agree to our Terms of Service and Privacy Policy.
-                {'\n'}
-                Your data is secure and encrypted.
-              </Text>
-            </View>
-          </View>
-
-          {/* Features Row */}
-          <View className="flex-row justify-between w-full px-1">
-            <View className="flex-1 items-center px-1">
-              <View
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 10,
-                  backgroundColor: 'rgba(59, 130, 246, 0.12)',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: 8,
-                }}
-              >
-                <Clock size={20} color="#3b82f6" />
               </View>
-              <Text className="font-medium text-xs text-foreground text-center">
-                Time Tracking
-              </Text>
-              <Text className="text-[11px] text-muted-foreground text-center mt-0.5">
-                Track time across projects
-              </Text>
             </View>
 
-            <View className="flex-1 items-center px-1">
-              <View
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 10,
-                  backgroundColor: 'rgba(16, 185, 129, 0.12)',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: 8,
-                }}
-              >
-                <Sparkles size={20} color="#10b981" />
-              </View>
-              <Text className="font-medium text-xs text-foreground text-center">
-                Analytics
-              </Text>
-              <Text className="text-[11px] text-muted-foreground text-center mt-0.5">
-                Detailed insights
-              </Text>
-            </View>
+            {/* Features Row - only show here if portrait */}
+            {!isLandscape && (
+              <View className="flex-row justify-between w-full px-1">
+                <View className="flex-1 items-center px-1">
+                  <View
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 10,
+                      backgroundColor: 'rgba(59, 130, 246, 0.12)',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: 8,
+                    }}
+                  >
+                    <Clock size={20} color="#3b82f6" />
+                  </View>
+                  <Text className="font-medium text-xs text-foreground text-center">
+                    Time Tracking
+                  </Text>
+                  <Text className="text-[11px] text-muted-foreground text-center mt-0.5">
+                    Track time across projects
+                  </Text>
+                </View>
 
-            <View className="flex-1 items-center px-1">
-              <View
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 10,
-                  backgroundColor: 'rgba(16, 185, 129, 0.12)',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: 8,
-                }}
-              >
-                <ChromeIcon size={20} color="#10b981" />
+                <View className="flex-1 items-center px-1">
+                  <View
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 10,
+                      backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: 8,
+                    }}
+                  >
+                    <Sparkles size={20} color="#10b981" />
+                  </View>
+                  <Text className="font-medium text-xs text-foreground text-center">
+                    Analytics
+                  </Text>
+                  <Text className="text-[11px] text-muted-foreground text-center mt-0.5">
+                    Detailed insights
+                  </Text>
+                </View>
+
+                <View className="flex-1 items-center px-1">
+                  <View
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 10,
+                      backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: 8,
+                    }}
+                  >
+                    <ChromeIcon size={20} color="#10b981" />
+                  </View>
+                  <Text className="font-medium text-xs text-foreground text-center">
+                    Sync
+                  </Text>
+                  <Text className="text-[11px] text-muted-foreground text-center mt-0.5">
+                    Access anywhere
+                  </Text>
+                </View>
               </View>
-              <Text className="font-medium text-xs text-foreground text-center">
-                Sync
-              </Text>
-              <Text className="text-[11px] text-muted-foreground text-center mt-0.5">
-                Access anywhere
-              </Text>
-            </View>
+            )}
           </View>
         </View>
       </ScrollView>

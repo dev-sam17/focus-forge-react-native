@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StatusBar, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StatusBar, Image, useWindowDimensions } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { TimeTrackingDashboard } from '../components/TimeTrackingDashboard';
@@ -10,12 +10,14 @@ import { ProfileDialog } from '../components/ProfileDialog';
 export function DashboardScreen() {
   const { user } = useAuth();
   const [profileVisible, setProfileVisible] = useState(false);
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
 
   const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
   const initial = (user?.user_metadata?.full_name || user?.email || 'U').charAt(0).toUpperCase();
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top', 'bottom']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top', 'bottom', 'left', 'right']}>
       <StatusBar barStyle="light-content" backgroundColor="#111827" />
 
       {/* Screen Background Ambient Glowing Orbs */}
@@ -48,8 +50,8 @@ export function DashboardScreen() {
         />
       </View>
 
-      <View className="flex-1 px-4 pt-2">
-        {/* Minimal Navbar Header matching Electron */}
+      <View className={`flex-1 px-4 pt-2 ${isLandscape ? 'flex-row gap-6' : 'flex-col'}`}>
+        {/* Minimal Navbar Header / Sidebar matching Electron */}
         <View
           style={{
             backgroundColor: 'rgba(31, 41, 55, 0.65)',
@@ -63,11 +65,12 @@ export function DashboardScreen() {
             shadowOpacity: 0.2,
             shadowRadius: 10,
             elevation: 4,
+            ...(isLandscape && { width: 200, marginBottom: 8 }),
           }}
-          className="flex-row items-center justify-between mb-4"
+          className={`${isLandscape ? 'flex-col items-center justify-between mb-4' : 'flex-row items-center justify-between mb-4'}`}
         >
-          {/* Logo & Brand */}
-          <View className="flex-row items-center">
+          <View className={`${isLandscape ? 'flex-col items-center' : 'flex-row items-center'}`}>
+            {/* Logo & Brand */}
             <LinearGradient
               colors={['#3b82f6', '#10b981']}
               start={{ x: 0, y: 0 }}
@@ -78,13 +81,14 @@ export function DashboardScreen() {
                 borderRadius: 10,
                 alignItems: 'center',
                 justifyContent: 'center',
-                marginRight: 10,
+                marginRight: isLandscape ? 0 : 10,
+                marginBottom: isLandscape ? 12 : 0,
               }}
             >
               <Clock size={18} color="#ffffff" />
             </LinearGradient>
-            <Text className="text-xl font-bold text-foreground tracking-tight">
-              Focus Forge
+            <Text className={`text-xl font-bold text-foreground tracking-tight ${isLandscape ? 'text-center mb-8' : ''}`}>
+              {isLandscape ? 'Focus\nForge' : 'Focus Forge'}
             </Text>
           </View>
 
@@ -118,7 +122,9 @@ export function DashboardScreen() {
         </View>
 
         {/* Dashboard Core Tabs & Content */}
-        <TimeTrackingDashboard />
+        <View className="flex-1">
+          <TimeTrackingDashboard />
+        </View>
       </View>
 
       <ProfileDialog
